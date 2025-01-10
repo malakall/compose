@@ -79,8 +79,6 @@ async def update_user(user_id: int, data: UpdateUser):
 
         db.commit()
 
-    return user_id
-
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int):
