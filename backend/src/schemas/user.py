@@ -17,6 +17,6 @@ class UserInfo(BaseModel):
 
 
 class UpdateUser(BaseModel):
-    name: Optional[str]
-    age: Optional[int]
-    male: Optional[bool]
+    name: Optional[str] = None
+    age: Optional[int] = None
+    male: Optional[bool] = None

@@ -10,14 +10,18 @@ from models.user import User
 router = APIRouter()
 
 
-@router.get("", response_model=UserInfo)
+@router.get(
+    "/{user_id}",
+    response_model=UserInfo,
+    responses={404: {"detail": "User not found"}}
+)
 async def get_user(user_id: int):
     q = select(User).where(User.id == user_id)
     
     with Database() as db:
         user = db.scalars(q).first()
         if user is None:
-            return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         
         return UserInfo(
             id=user.id,
@@ -27,8 +31,8 @@ async def get_user(user_id: int):
         )
     
 
-@router.get("/all", response_model=List[UserInfo])
-async def get_user():
+@router.get("/", response_model=List[UserInfo])
+async def get_users():
     q = select(User)
     
     users = []
@@ -45,7 +49,7 @@ async def get_user():
     return users
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=int)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=int)
 async def create_user(data: CreateUser):
     user = User()
     user.name = data.name
@@ -61,14 +65,18 @@ async def create_user(data: CreateUser):
     return user_id
 
 
-@router.put("", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={404: {"detail": "User not found"}}
+)
 async def update_user(user_id: int, data: UpdateUser):
     q = select(User).where(User.id == user_id)
     
     with Database() as db:
         user = db.scalars(q).first()
         if user is None:
-            return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         
         if data.name is not None:
             user.name = data.name
@@ -80,14 +88,18 @@ async def update_user(user_id: int, data: UpdateUser):
         db.commit()
 
 
-@router.delete("", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={404: {"detail": "User not found"}}
+)
 async def delete_user(user_id: int):
     q = select(User).where(User.id == user_id)
     
     with Database() as db:
         user = db.scalars(q).first()
         if user is None:
-            return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         
         db.delete(user)
         db.commit()
