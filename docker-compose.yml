@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  api:
+    build: ./backend
+    container_name: backend_api
+    restart: always
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+
+  nginx:
+    build: ./nginx
+    container_name: nginx_proxy
+    restart: always
+    networks:
+      - frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/dist:/public
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  postgres_data:
